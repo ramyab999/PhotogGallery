@@ -5,32 +5,29 @@ const button = document.getElementById("getPhotos");
 button.addEventListener("click", getPhotos);
 
 async function getPhotos() {
-  const count = document.getElementById("photoCount").value;
+  const count = parseInt(document.getElementById("photoCount").value, 10);
 
-  if (count < 0 || count > 11) {
-    alert("Please enter a number between 0 and 11.");
+  // Validate input
+  if (isNaN(count) || count < 1 || count > 11) {
+    alert("Please enter a number between 1 and 11.");
     return;
   }
 
   const UNSPLASH_URL = `https://api.unsplash.com/photos/random?count=${count}&client_id=${ACCESS_KEY}`;
-  const PROXY_URL = `https://api.allorigins.win/get?url=${encodeURIComponent(
-    UNSPLASH_URL
-  )}`;
-  console.log("Fetching from:", PROXY_URL);
+  console.log("Fetching from:", UNSPLASH_URL);
 
   try {
-    const res = await fetch(PROXY_URL);
-    if (!res.ok) throw new Error("Network response was not ok");
+    const res = await fetch(UNSPLASH_URL);
+    if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
 
-    const wrapped = await res.json();
-    const data = JSON.parse(wrapped.contents); // Unsplash photos array
-
+    const data = await res.json(); // Unsplash photos array
     gallery.innerHTML = "";
 
     data.forEach((photo) => {
       const img = document.createElement("img");
       img.src = photo.urls.small;
       img.alt = photo.alt_description || "Unsplash Image";
+      img.loading = "lazy"; // Better performance
       gallery.appendChild(img);
     });
   } catch (err) {
